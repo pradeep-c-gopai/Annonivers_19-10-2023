@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<style>
+ 
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+ 
+</style>
+<body>
+    <form action="https://test.bitpay.com/checkout" method="post">
+        <input type="hidden" name="action" value="checkout" />
+        <input type="hidden" name="posData" value="" />
+        <input type="hidden" name="notificationType" value="json" />
+        <input type="hidden" name="data" value="lrlt4JNS4eiA+HAxfqf+z2SO1rmfdJEjOqQKi6NFgrGfUotDEBCEvHGe5che/G2TopKdJ8KncFKow90KVMD8TZWaJb1jXgAI1mijs2l85oG1H/+S94TEINBhRzttHxGTK49k0K90/VjiaTRFj43gRg==" />
+        <input id="bitpayClick" type="image" src="https://test.bitpay.com/cdn/en_US/bp-btn-pay-currencies.svg" name="submit" style="width: 210px" onCli alt="BitPay, the easy way to pay with bitcoins.">
+    </form>
+ 
+</body>
+
+<script>
+ 
+    document.getElementById('bitpayClick').addEventListener('click', function(){
+        let Dimensions = {
+            width: '100%',
+            height: '300px'
+        } 
+        complete_order()
+        async function complete_order(){
+            let data = await fetch('https://metaverse.sakhaglobal.com:447/complete_order',
+            {method:"POST"}) 
+            .then((response) =>{     
+            return response.json() })
+            .finally(() => {
+                sessionStorage.clear();
+            })
+        }
+        localStorage.setItem("iframeWidth", JSON.parse(Dimensions));
+    })
+
+
+</script>
+
+<script>
+
+  
+  
+
+ </script>
+</html>

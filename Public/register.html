@@ -1,0 +1,217 @@
+<html>
+   <head>
+      <title>Shopiverse</title>
+      <!-- CSS only -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+      crossorigin="anonymous"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,
+         initial-scale=1.0"
+    />
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+    <link href="./loginfile.css" rel="stylesheet" />
+   </head>
+  <body style="background-color: #060258; color: white">
+   <div id="snackbar"></div>
+   <div id="overlay"></div>
+   <div id="loaderDiv">
+      <div id="loader"></div>
+   </div>
+
+      
+      <div class="avatarIframe">
+        <iframe width="100%" height="100vh" id="frame" class="frame" allow="camera *; microphone *; clipboard-write"></iframe>
+      </div>
+  
+   </body>
+
+ 
+  <script type="text/javascript" src="scripts/app.js" ></script>
+<script>
+  const subdomain = 'anonyverse'; // Replace with your custom subdomain
+  const frame = document.getElementById('frame');
+
+  frame.src = `https://${subdomain}.readyplayer.me/avatar?frameApi&clearCache&bodyType=fullbody&quickStart`
+
+  window.addEventListener('message', subscribe);
+  document.addEventListener('message', subscribe);
+
+  function subscribe(event) {
+      const json = parse(event);
+
+      if (json?.source !== 'readyplayerme') {
+          return;
+      }
+      // Susbribe to all events sent from Ready Player Me once frame is ready
+      if (json.eventName === 'v1.frame.ready') {
+          frame.contentWindow.postMessage(
+              JSON.stringify({
+                  target: 'readyplayerme',
+                  type: 'subscribe',
+                  eventName: 'v1.**'
+              }),
+              '*'
+          );
+      }
+
+      // Get avatar GLB URL
+      if (json.eventName === 'v1.avatar.exported') {
+          document.getElementById('frame').hidden = true;
+          start_exe(447);
+          sessionStorage.setItem("AvatarURL", JSON.stringify(json.data.url));
+          const url =  window.location.href;
+          const urlObj = new URL(url);
+          const sessionId = urlObj.searchParams.get("sessionId");
+          if(sessionId == null){
+            window.location.href = `/player.html?hoveringMouse=true`
+          }
+          else{
+            window.location.href = `/player.html?hoveringMouse=true&sessionId=${sessionId}`
+          }
+          // sessionStorage.setItem("isGuestLogin", JSON.stringify(true));         
+      }
+
+      // Get user id
+      if (json.eventName === 'v1.user.set') {
+          console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
+      }
+      function parse(event) {
+    sessionStorage.setItem('hasIframeLoaded', JSON.stringify(true))  
+    try {
+          return JSON.parse(event.data);
+      } catch (error) {
+          return null;
+      }
+  }
+  }
+
+</script>
+<script>
+  function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  const sessionId = getQueryParam('sessionId');
+  const loginType = getQueryParam('loginType');
+  const isEmployee = getQueryParam('isEmployee');
+
+  sessionStorage.setItem('sessionId', sessionId);
+  sessionStorage.setItem('loginType', loginType);
+  sessionStorage.setItem('UserRole', isEmployee == 1 ? 1 : 2);
+
+
+</script>
+<script>
+  // Define your receiveMessage function
+  function receiveMessage(event) {
+    if (event.origin === 'https://metaverse.sakhaglobal.com:8081') { // Adjust the allowed origin accordingly
+      const receivedData = event.data;
+      // Handle the received data here
+      console.log('Received data from Auth microservice:', receivedData);
+      
+      // Store the received data in a cookie
+      document.cookie = `metaverseData=${JSON.stringify(receivedData)}; path=/;`;
+    }
+  }
+
+  // Add an event listener when the page loads
+  window.addEventListener('message', receiveMessage);
+
+  // Remove the event listener when the page unloads (optional)
+  window.addEventListener('unload', () => {
+    window.removeEventListener('message', receiveMessage);
+  });
+</script>
+
+<script>
+  // Function to parse the cookie string and retrieve the data
+  function parseCookie(cookieName) {
+      const cookies = document.cookie.split('; ');
+      for (const cookie of cookies) {
+          const [name, value] = cookie.split('=');
+          if (name === cookieName) {
+              // Parse the JSON data
+              return JSON.parse(decodeURIComponent(value));
+          }
+      }
+      return null;
+  }
+
+  // Read the cookie named 'metaverseData'
+  const receivedData = parseCookie('metaverseData');
+  console.log('1111111111111111111111111111',receivedData.role);
+  console.log('1111111111111111111111111111',receivedData.token);
+  if(receivedData.role==1)
+  {
+  sessionStorage.setItem('did', receivedData.did);
+  sessionStorage.setItem('sessionId', receivedData.sessionID);
+  sessionStorage.setItem('loginType', receivedData.loginType);
+  sessionStorage.setItem('token', receivedData.token);
+  sessionStorage.setItem('gender', receivedData.gender);
+  sessionStorage.setItem('location', receivedData.location);
+  sessionStorage.setItem('UserRole', receivedData.role == 1 ? 1 : 2);
+  }
+  else{
+    console.log('h111111111')
+  sessionStorage.setItem('loginType', receivedData.loginType);
+  sessionStorage.setItem('token', receivedData.token);
+  sessionStorage.setItem('gender', receivedData.gender);
+  sessionStorage.setItem('location', receivedData.location);
+  sessionStorage.setItem('UserRole', receivedData.role == 1 ? 1 : 2);
+  }
+  // Display the received data in the container
+  const receivedDataContainer = document.getElementById('receivedDataContainer');
+  if (receivedData) {
+      const heading = document.createElement('h2');
+      heading.textContent = 'Received Data';
+
+      const pre = document.createElement('pre');
+      pre.textContent = JSON.stringify(receivedData, null, 2);
+
+      receivedDataContainer.appendChild(heading);
+      receivedDataContainer.appendChild(pre);
+  }
+
+</script>
+<script>
+
+  async function validateToken() {
+
+    if (sessionStorage.getItem('token')) {
+
+      const token = sessionStorage.getItem('token');
+
+      const headers = {
+        'Authorization': `Bearer ${token}`
+      };
+      await fetch('https://metaverse.sakhaglobal.com:447/verifySig', { headers })
+        .then(response => {
+          if (response.ok) {
+            response.json().then(data => {
+              console.log('API response data:security', data);
+            });
+          } else {
+            alert('Unauthorized');
+            window.location.href = 'https://metaverse.sakhaglobal.com:8081';
+          }
+        })
+        .catch(error => {
+          console.error('API request failed:', error);
+        });
+    } else {
+      window.location.href = 'https://metaverse.sakhaglobal.com:8081';
+    }
+    }
+
+    validateToken();
+
+</script>
+
+
+</html>

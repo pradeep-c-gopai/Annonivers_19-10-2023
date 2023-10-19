@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Data as List View in Popup</title>
+    <style>
+        /* Styles for the popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+
+        /* Styles for the overlay background */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+        }
+
+        /* Button style to trigger the popup */
+        button {
+            margin: 10px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style for the list */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <button id="showPopupButton">Show Data</button>
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <h2>Data List</h2>
+        <ul id="dataList"></ul>
+        <button id="closePopupButton">Close</button>
+    </div>
+
+    <script>
+        // Function to fetch data from the API
+        function fetchData() {
+            fetch('http://localhost:3000/queries/2')
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the data and display it in the list
+                    const dataList = document.getElementById('dataList');
+                    dataList.innerHTML = ''; // Clear previous data
+                    data.forEach(item => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <strong>Priority:</strong> ${item.priority}<br>
+                            <strong>Pseudonym:</strong> ${item.pseudonym}<br>
+                            <strong>Message:</strong> ${item.message}<br>
+                            <hr>
+                        `;
+                        dataList.appendChild(listItem);
+                    });
+
+                    // Show the popup
+                    const overlay = document.getElementById('overlay');
+                    const popup = document.getElementById('popup');
+                    overlay.style.display = 'block';
+                    popup.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        // Function to close the popup
+        function closePopup() {
+            const overlay = document.getElementById('overlay');
+            const popup = document.getElementById('popup');
+            overlay.style.display = 'none';
+            popup.style.display = 'none';
+        }
+
+        // Event listeners
+        const showPopupButton = document.getElementById('showPopupButton');
+        showPopupButton.addEventListener('click', fetchData);
+
+        const closePopupButton = document.getElementById('closePopupButton');
+        closePopupButton.addEventListener('click', closePopup);
+    </script>
+</body>
+</html>
